@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FluentMind</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>FluentMind</h1>
+     <div id="instructions">
+     <h3>Instructions:</h3>
+         <li>Complete the writing session.</li>
+         <li>Your score will appear once the time is up.</li>
+         <li>Click "Copy Score" to copy your results.</li>
+         <li>Paste the data into your spreadsheet, matching each value to its column header.
+         <img src="{{ url_for('static', filename='spreadsheet_example.jpg') }}" alt="Example of a correctly pasted score in a spreadsheet" />
+         
+    
+    </div>
+    <form>
+        <label for="duration">Duration:</label>
+        <select name="duration" id="duration">
+            <option value="" selected disabled>Select a duration</option>
+            <option value="5">5 minutes</option>
+            <option value="10">10 minutes</option>
+            <option value="15">15 minutes</option>
+        </select>
+        <button type="button" id="startButton">Start</button>
+        <div id="timer">00:00</div>
+        <label for="text">Start writing:</label>
+        <textarea name="text" id="text" cols="80" rows="20"></textarea>
+        <button id="copyButton" style="display:none;">Copy Score</button>
+        <div id="result"></div>
+    </form>
+    </div>
+
+    <script>
+document.getElementById("startButton").addEventListener("click", function () {
+  const duration = parseFloat(document.getElementById("duration").value);
+  const timer = document.getElementById("timer");
+
+  if (duration) {
+    let remainingTime = duration * 60;
+    timer.textContent = formatTime(remainingTime);
+    document.getElementById("duration").disabled = true;
+    document.getElementById("startButton").disabled = true;
+
+    const intervalId = setInterval(() => {
+      remainingTime--;
+
+      if (remainingTime < 0) {
+        clearInterval(intervalId);
+        alert("Time's up!");
+
+        // Display the score
+        const scoreDate = new Date().toLocaleDateString();
+        const textArea = document.getElementById("text");
+        const words = textArea.value.split(" ").length;
+        const wpm = (words / (duration * 60)) * 60;
+
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = `
+          Date: ${scoreDate}<br>
+          Total words: ${words}<br>
+          Words per minute: ${wpm.toFixed(2)}<br>
+          Chosen duration: ${duration} minutes
+        `;
+
+        const copyButton = document.getElementById("copyButton");
+        copyButton.style.display = "block";
+
+          copyButton.addEventListener("click", function (event) {
+  event.preventDefault();
+          const tempTextArea = document.createElement("textarea");
+          tempTextArea.value = `${scoreDate}\t${words}\t${wpm.toFixed(2)}\t${duration}`;
+          document.body.appendChild(tempTextArea);
+          tempTextArea.select();
+          document.execCommand("copy");
+          document.body.removeChild(tempTextArea);
+          alert("Score copied to clipboard!");
+
+          // Timer reset has been removed from here
+        });
+      }
+
+      timer.textContent = formatTime(remainingTime);
+    }, 1000);
+  } else {
+    timer.textContent = "00:00";
+  }
+});
+
+function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return String(minutes).padStart(2, "0") + ":" + String(remainingSeconds).padStart(2, "0");
+}
+
+</script>
+</body>
+</html>
+
+
