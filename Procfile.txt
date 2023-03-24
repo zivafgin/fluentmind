@@ -1,1 +1,1 @@
-web: python lan_practice.py
+web: gunicorn lan_practice:app
