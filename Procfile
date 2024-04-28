@@ -1,0 +1,1 @@
+web: gunicorn lan_practice:app

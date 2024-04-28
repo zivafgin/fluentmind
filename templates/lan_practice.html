@@ -6,19 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FluentMind</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <h1>FluentMind</h1>
-     <div id="instructions">
-     <h3>Instructions:</h3>
-         <li>Complete the writing session.</li>
-         <li>Your score will appear once the time is up.</li>
-         <li>Click "Copy Score" to copy your results.</li>
-         <li>Paste the data into your spreadsheet, matching each value to its column header.
-         <img src="{{ url_for('static', filename='spreadsheet_example.jpg') }}" alt="Example of a correctly pasted score in a spreadsheet" />
-         
-    
+
+    <div id="instructions">
+        <ol>
+            <li>Complete the writing session.</li>
+            <li>Your score will appear once the time is up.</li>
+            <li>Click "Copy Score" to copy your results.</li>
+            <li>Paste the data into your spreadsheet, matching each value to its column header.</li>
+        </ol>
+        <div id="imageAndButtonContainer">
+            <img src="{{ url_for('static', filename='spreadsheet_example.jpg') }}" alt="Example of a correctly pasted score in a spreadsheet" />
+            <a href="https://docs.google.com/spreadsheets/u/0/" target="_blank">Google Spreadsheet</a>
+            <div>
+                <button id="copyHeadersButton">Copy Headers</button>
+            </div>
+            <div id="roleSelection">
+              <h3>Select your advisor:</h3>
+              <div class="radio-option">
+                <input type="radio" id="coach" name="role" value="coach">
+                <label for="coach">Coacher</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="psychologist" name="role" value="psychologist">
+                <label for="psychologist">Psychologist</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="teacher" name="role" value="teacher" checked>
+                <label for="teacher">English Teacher</label>
+              </div>
+            </div>
+            
+        </div>
     </div>
+    
+    
+    <div class="footer">
+        <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+        <a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+    </div>
+    
     <form>
         <label for="duration">Duration:</label>
         <select name="duration" id="duration">
@@ -29,67 +59,100 @@
         </select>
         <button type="button" id="startButton">Start</button>
         <div id="timer">00:00</div>
+        <div id="feedback-container"></div>
         <label for="text">Start writing:</label>
         <textarea name="text" id="text" cols="80" rows="20"></textarea>
-        <button id="copyButton" style="display:none;">Copy Score</button>
+        <div id="buttonContainer">
+          <button id="copyButton" onclick="copyScore(event)" style="display:none;">Copy Score</button>
+          <button id="downloadButton" onclick="downloadText(event)" style="display:none;">Download Text</button>
+        </div>
         <div id="result"></div>
+        <!-- Add this section within your <form> tag where it's appropriate for your layout -->
+
+
     </form>
-    </div>
 
     <script>
-document.getElementById("startButton").addEventListener("click", function () {
+      function copyScore(event) {
+  event.preventDefault();  // Add this line to prevent default behavior
+
+  const scoreDate = new Date().toLocaleDateString();
+  const textArea = document.getElementById("text");
+  const words = textArea.value.split(" ").length;
   const duration = parseFloat(document.getElementById("duration").value);
-  const timer = document.getElementById("timer");
+  const wpm = (words / (duration * 60)) * 60;
 
-  if (duration) {
-    let remainingTime = duration * 60;
+  // Format the result as four columns
+  const resultText = `${scoreDate}\t${words}\t${wpm.toFixed(2)}\t${duration}`;
+
+  const tempTextArea = document.createElement("textarea");
+  tempTextArea.value = resultText; // Set the content you want to copy
+  document.body.appendChild(tempTextArea);
+  tempTextArea.select();
+  document.execCommand("copy");
+  document.body.removeChild(tempTextArea);
+  alert("Score copied to clipboard!");
+}
+
+        document.getElementById("startButton").addEventListener("click", function () {
+          const duration = parseFloat(document.getElementById("duration").value);
+          const timer = document.getElementById("timer");
+
+          if (duration) {
+            let countdown = 3;
+            const countdownId = setInterval(() => {
+              timer.textContent = "00:" + String(countdown).padStart(2, "0");
+              countdown--;
+
+              if (countdown < 0) {
+                clearInterval(countdownId);
+                let remainingTime = duration * 60;
+                timer.textContent = formatTime(remainingTime);
+                document.getElementById("duration").disabled = true;
+                document.getElementById("startButton").disabled = true;
+
+                const intervalId = setInterval(() => {
+                  remainingTime--;
+
+                  if (remainingTime <= 0) {
+                  clearInterval(intervalId);
+                  timer.innerHTML = ''; // Clears the timer content
+                  alert("Time's up!");
+                  document.querySelector("label[for='text']").style.display = "none";  // Add this line
+                  document.getElementById("duration").style.display = "none";
+                  document.querySelector("label[for='duration']").style.display = "none";
+                  document.getElementById("startButton").style.display = "none";
+
+
+
+
+    // Display the score
+    const scoreDate = new Date().toLocaleDateString();
+    const textArea = document.getElementById("text");
+    const words = textArea.value.split(" ").length;
+    const wpm = (words / (duration * 60)) * 60;
+
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = `
+        Date: ${scoreDate}<br>
+        Total words: ${words}<br>
+        Words per minute: ${wpm.toFixed(2)}<br>
+        Chosen duration: ${duration} minutes
+    `;
+    document.getElementById("copyButton").style.display = "inline-block";
+    document.getElementById("downloadButton").style.display = "inline-block";
+    // Call the getFeedback function
+    getFeedback();
+} else {
     timer.textContent = formatTime(remainingTime);
-    document.getElementById("duration").disabled = true;
-    document.getElementById("startButton").disabled = true;
+}
 
-    const intervalId = setInterval(() => {
-      remainingTime--;
-
-      if (remainingTime < 0) {
-        clearInterval(intervalId);
-        alert("Time's up!");
-
-        // Display the score
-        const scoreDate = new Date().toLocaleDateString();
-        const textArea = document.getElementById("text");
-        const words = textArea.value.split(" ").length;
-        const wpm = (words / (duration * 60)) * 60;
-
-        const resultDiv = document.getElementById("result");
-        resultDiv.innerHTML = `
-          Date: ${scoreDate}<br>
-          Total words: ${words}<br>
-          Words per minute: ${wpm.toFixed(2)}<br>
-          Chosen duration: ${duration} minutes
-        `;
-
-        const copyButton = document.getElementById("copyButton");
-        copyButton.style.display = "block";
-
-          copyButton.addEventListener("click", function (event) {
-  event.preventDefault();
-          const tempTextArea = document.createElement("textarea");
-          tempTextArea.value = `${scoreDate}\t${words}\t${wpm.toFixed(2)}\t${duration}`;
-          document.body.appendChild(tempTextArea);
-          tempTextArea.select();
-          document.execCommand("copy");
-          document.body.removeChild(tempTextArea);
-          alert("Score copied to clipboard!");
-
-          // Timer reset has been removed from here
-        });
-      }
-
-      timer.textContent = formatTime(remainingTime);
-    }, 1000);
-  } else {
-    timer.textContent = "00:00";
-  }
+}, 1000);
+}
+}, 1000);
+} else {
+timer.textContent = "00:00";
+}
 });
 
 function formatTime(seconds) {
@@ -98,8 +161,76 @@ function formatTime(seconds) {
   return String(minutes).padStart(2, "0") + ":" + String(remainingSeconds).padStart(2, "0");
 }
 
+document.getElementById("copyHeadersButton").addEventListener("click", function (event) {
+  event.preventDefault();
+  const output = 'Date\tTotal words\tWords per minute\tDuration\t=(10000-SUM(B2:B30)) & " Words left:"';
+  const tempTextArea = document.createElement("textarea");
+  tempTextArea.value = output;
+  document.body.appendChild(tempTextArea);
+  tempTextArea.select();
+  document.execCommand("copy");
+  document.body.removeChild(tempTextArea);
+  alert("Headers copied to clipboard!");
+});
+
+function downloadText(event) {
+  event.preventDefault();
+
+  const textArea = document.getElementById("text");
+  const text = textArea.value;
+  const scoreDate = new Date().toLocaleDateString().replace(/[/]/g, '-');  // Format the date
+  
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${scoreDate}.txt`;  // Use the date as the file name
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function getFeedback() {
+  const text = document.getElementById("text").value;
+  // Retrieve the selected role from the radio buttons
+  const role = document.querySelector('input[name="role"]:checked').value;
+  
+  fetch('/get_feedback', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    // Include the role in the body of the request
+    body: `text=${encodeURIComponent(text)}&role=${role}`
+  })
+  .then(response => response.json())
+  .then(data => {
+    const feedbackContainer = document.getElementById("feedback-container");
+    const formattedFeedback = data.feedback.replace(/(\d+\))/g, '<br>$1');
+    feedbackContainer.innerHTML = `<span class="feedback-text">${formattedFeedback}</span>`;
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+
+// You need to add an event listener for a button that triggers getFeedback
+// For example, if you have a button with id 'getFeedbackButton':
+document.getElementById('getFeedbackButton').addEventListener('click', getFeedback);
+
+
+document.getElementById("text").addEventListener("input", function(event) {
+    const wordCount = this.value.split(/\s+/).filter(function(n) { return n != '' }).length;
+    if (wordCount > 2000) {
+        alert("You have exceeded the 2000 word limit!");
+        // Disable the submit button, or handle as necessary
+    }
+});
+
 </script>
+
 </body>
 </html>
-
 

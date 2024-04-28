@@ -1,6 +1,6 @@
 body {
-  background-color: #f2f2f2;
-  font-family: Arial, sans-serif;
+  background-color: #e6f7ff;
+  font-family: 'Roboto', sans-serif;
   line-height: 1.5;
 }
 
@@ -10,7 +10,7 @@ body {
 }
 
 h1 {
-  color: #333;
+  color: #0050b3;
   font-size: 2.5em;
 }
 
@@ -25,7 +25,7 @@ h1 {
 form {
   flex: 1;
   background-color: #fff;
-  padding: 20px;
+  padding: 10px;
   border-radius: 20px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
   margin-top: 50px;
@@ -33,10 +33,19 @@ form {
 }
 
 #instructions {
-    
   margin-top: 20px;
   max-width: 600px;
   margin-bottom: 5px;
+  text-align: left;
+}
+
+#instructions ol {
+  padding-left: 0;
+  margin-left: 0;
+}
+
+#instructions li {
+  list-style-position: inside;
 }
 
 label {
@@ -54,20 +63,24 @@ select {
   margin-bottom: 20px;
 }
 
-button {
-  background-color: #1c7dc2;
+button, #copyButton, #startButton, #copyScoreButton {
+  background-color: #ff5733; 
   color: #fff;
   border: none;
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
   margin-top: -5px;
+  margin-bottom: 10px;
+}
+
+button:hover, #copyButton:hover, #startButton:hover, #copyScoreButton:hover {
+  background-color: #c70039; 
 }
 
 #timer {
   font-size: 4em;
   text-align: center;
-  margin-top: 20px;
   color: #333;
 }
 
@@ -77,16 +90,7 @@ button {
   border: 1px solid #ccc;
   border-radius: 5px;
   margin-bottom: 20px;
-}
-
-#copyButton {
-  background-color: #1c7dc2;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
 img {
@@ -100,8 +104,104 @@ ol {
 }
 
 li {
+  text-align: left;
   margin-bottom: 10px;
   color: #333;
 }
 
-#
+#imageAndButtonContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+}
+
+#imageAndButtonContainer img {
+    margin-bottom: 10px;
+}
+
+#copyHeadersButton {
+  background-color: #ff5733;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  margin: bottom 0px;
+}
+
+#copyHeadersButton:hover {
+  background-color: #c70039;
+}
+
+textarea {
+  width: 100%;
+  height: 150px;  /* Reducing the height by a specific amount */
+  box-sizing: border-box;
+}
+
+
+.footer {
+  position: fixed;
+  left: 0;
+ 
+  bottom: 0;
+  width: 100%;
+  background-color: #e6f7ff;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.footer a {
+  text-decoration: none;
+  color: #000;
+  margin: 0 10px;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.feedback-text {
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 1.2;
+  text-align: left;
+
+}
+
+
+#roleSelection label {
+  display: inline-block; /* Aligns the label next to the radio button */
+  margin-right: 15px; /* Adjust spacing as needed */
+}
+
+#roleSelection input {
+  display: inline-block; /* Aligns the radio button inline */
+  margin-right: 5px; /* Adjust spacing as needed */
+}
+
+@media screen and (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  form {
+    margin-right: 0;
+    margin-top: 30px;
+     padding: 10px;
+  }
+
+  #imageAndButtonContainer {
+    align-items: center;
+  }
+
+  #buttonContainer {
+    display: flex;
+    flex-direction: row;  /* Ensure buttons are in a row */
+    gap: 16px;  /* Add space between buttons */
+  }
+  
+
+  
+}
